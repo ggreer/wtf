@@ -2,12 +2,19 @@
   "name": "wtf",
   "description": "Slack bot to help with acronyms",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ggreer/wtf"
+  },
   "scripts": {
     "debug": "node inspect -r ts-node/register index.ts",
     "lint": "eslint .",
-    "start": "ts-node index.ts"
+    "build": "tsc --build"
   },
   "dependencies": {
+    "@slack/events-api": "^2.3.3",
+    "@types/aws-lambda": "^8.10.55",
+    "@types/node": "^14.0.13",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
   },

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "outDir": "./dist/",
+    "sourceMap": false,
+    "strict": true,
+    "target": "es2018",
+    "resolveJsonModule": true
+  },
+  "lib": ["es2018"],
+  "exclude": [
+    "dist/",
+    "node_modules/"
+  ]
+}

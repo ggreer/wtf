@@ -31,6 +31,11 @@
     core-js-pure "^3.0.0"
     regenerator-runtime "^0.13.4"
 
+"@types/aws-lambda@^8.10.55":
+  version "8.10.55"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.55.tgz#7293cf7908766a60efc28262cbf65a8a957dec0e"
+  integrity sha512-rtJhfxbsqmIC6t/vnUqvZH2PyLHJscYc166P+sHWAIp0Rx4szDarL+Ul8esGYZFWrQ36q2MHrPMzuI23zXSlMg==
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -50,6 +55,11 @@
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
+
+"@types/node@^14.0.13":
+  version "14.0.13"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.13.tgz#ee1128e881b874c371374c1f72201893616417c9"
+  integrity sha512-rouEWBImiRaSJsVA+ITTFM6ZxibuAlTuNOCyxVbwreu6k6+ujs7DfnU9o+PShFhET78pMBl3eH+AGSI5eOTkPA==
 
 "@typescript-eslint/eslint-plugin@2.x":
   version "2.34.0"
