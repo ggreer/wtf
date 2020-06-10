@@ -1,3 +1,10 @@
+import cheerio from 'cheerio';
+
+import { html } from './html';
+
+const $ = cheerio.load(html);
+export const table = $('table');
+
 export const acronyms: Record<string, string[]> = {
   'ZT': ['Zero Trust  '],
   'XACML': [' eXtensible Access Control Markup Language  '],
