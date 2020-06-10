@@ -9,7 +9,8 @@
   "scripts": {
     "debug": "node inspect -r ts-node/register index.ts",
     "lint": "eslint .",
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "upload": "yarn build && cd dist && zip ../dist.zip --filesync -r . && cd .. && aws lambda update-function-code --function-name wtf --zip-file=fileb://dist.zip"
   },
   "dependencies": {
     "@slack/events-api": "^2.3.3",
@@ -27,5 +28,6 @@
     "rules": {
       "no-console": "off"
     }
-  }
+  },
+  "version": "0.0.0"
 }
