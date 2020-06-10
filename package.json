@@ -1,0 +1,24 @@
+{
+  "name": "wtf",
+  "description": "Slack bot to help with acronyms",
+  "license": "UNLICENSED",
+  "scripts": {
+    "debug": "node inspect -r ts-node/register index.ts",
+    "lint": "eslint .",
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "eslint": "^7.2.0",
+    "eslint-config-okta": "^0.0.8"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-okta",
+    "rules": {
+      "no-console": "off"
+    }
+  }
+}
