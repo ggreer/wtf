@@ -8,7 +8,7 @@ export const fetch = async (str: string): Promise<string> => new Promise((a, r) 
   let data = "";
   const req = request(url, { method: "GET" }, res => {
     if (res.statusCode !== 200) {
-      return r();
+      return r(`Bad status code from Wikipedia: ${res.statusCode}`);
     }
     res.on('data', chunk => data += chunk);
     res.on('end', () => {
@@ -22,23 +22,23 @@ export const fetch = async (str: string): Promise<string> => new Promise((a, r) 
       const pages = body?.query?.pages;
       const pageKey = Object.keys(pages)[0];
       if (parseInt(pageKey, 10) < 0) {
-        return r();
+        return r("No Wikipedia article.");
       }
       const page = pages[pageKey];
       const $ = cheerio.load(page?.extract);
       const extract = $.root().text().trim();
       if (!extract) {
-        return r();
+        return r("Empty Wikipedia extract.");
       }
       console.log(extract);
       const link = `https://en.wikipedia.org/wiki/${page.title}`;
       const msg = `Wikipedia says:\n${extract} <${link}|${page.title}>`;
-      a(msg);
+      return a(msg);
     });
   });
   req.on('error', e => {
     console.error(e.message);
-    r(e);
+    r(e.message);
   });
   req.end();
 });
