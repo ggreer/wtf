@@ -52,7 +52,6 @@ const verifySignature = (signature='', timestamp='', body='') => {
   const a = Buffer.from(hash ?? '', 'hex');
   const b = hmac.digest();
   if (a.length !== b.length) {
-    console.error(`a ${a.toString('utf8')} is not the same length as b ${b.toString('utf8')}`);
     return false;
   }
   return crypto.timingSafeEqual(a, b);
@@ -111,7 +110,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const signature = event.headers['X-Slack-Signature'];
   const timestamp = event.headers['X-Slack-Request-Timestamp'];
 
-  console.log(signature, timestamp);
+  // console.log(signature, timestamp);
   if (!verifySignature(signature, timestamp, event.body ?? '')) {
     return {
       statusCode: 401,
@@ -126,7 +125,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       body: body?.challenge,
     };
   }
-  console.log(JSON.stringify(body));
   const slackEvent: SlackEvent = body.event;
   if (slackEvent.type !== 'app_mention') {
     // Don't care.
@@ -143,16 +141,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       b.elements.map(element => element.elements?.filter(e => e.type === 'text').forEach(e => e.text && text.push(e.text)));
       return text;
     }, []);
-  console.log('chunks', chunks);
+  // console.log('chunks', chunks);
   const string = chunks.join(' ').trim();
   console.log(string);
 
   const definition = getDefinition(string);
   console.log('definition', definition);
   await reply(slackEvent, definition);
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({ text: 'acronym' }),
+
+  // Send a 204 so Slack doesn't get angry at us
+  return {
+    statusCode: 204,
+    body: '',
   };
-  return response;
 };
