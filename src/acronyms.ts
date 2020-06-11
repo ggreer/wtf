@@ -8,7 +8,7 @@ type Acronym = {
   acronym: string;
   link?: string;
   oktaOnly: boolean;
-  text: string;
+  text: string | (() => string);
 }
 
 const acronyms: Record<string, Acronym[]> = {
@@ -30,7 +30,9 @@ const acronyms: Record<string, Acronym[]> = {
   lars: [{
     acronym: 'Lars',
     oktaOnly: false,
-    text: ':larsipoo:',
+    text: () => Math.random() > 0.5
+      ? ':larsipoo:'
+      : 'a :poop: from :flag-no:',
   }],
   "samer's favorite champagne": [{
     acronym: "Samer's favorite champagne",
@@ -40,12 +42,15 @@ const acronyms: Record<string, Acronym[]> = {
   liverpool: [{
     acronym: "Liverpool",
     oktaOnly: false,
-    text: 'Liverpool\'s last league title was in 1990',
+    text: () => Math.random() > 0.5
+      ? 'Liverpool\'s last league title was in 1990.'
+      : 'The best Football club in the world!',
   }],
   wtf: [{
     acronym: "WTF",
     oktaOnly: false,
     text: 'World Taekwondo Federation',
+    link: 'https://github.com/ggreer/wtf',
   }],
 };
 
@@ -76,13 +81,14 @@ $('table > tbody').find('tr').each((i, tr) => {
 
 const mrkdwnLink = ({ acronym, link, text, oktaOnly }: Acronym) => {
   let msg;
+  text = typeof text === 'function' ? text() : text;
   if (link) {
     msg = `*${acronym}*: <${link}|${text}>`;
   } else {
     msg = `*${acronym}*: ${text}`;
   }
   if (oktaOnly) {
-    msg += ' _Okta only_';
+    msg += ' _(Okta only)_';
   }
   return msg;
 };
@@ -108,9 +114,36 @@ const findClosest = (needle: string): string[] => {
     : [];
 };
 
+const formatResponse = (authority: string, msg: string) => `_${authority}_ says:\n${msg}`;
 
 export const getDefinition = async (str: string): Promise<string> => {
   const key = str.toLowerCase();
+
+  if (key === 'help') {
+    return 'see @wtf man';
+  }
+
+  if (key === 'man') {
+    return 'todo';
+  }
+
+  if (key === 'random' || key === 'rand') {
+    const keys = Object.keys(acronyms);
+    return getDefinition(keys[Math.floor(keys.length * Math.random())]);
+  }
+
+  const re = new RegExp(/(urban\s+)(?<urbanStr>[^?]+)\??/, 'g');
+  const matches = re.exec(str);
+  const urbanStr = matches?.groups?.urbanStr;
+  if (urbanStr) {
+    try {
+      const r = await urbanDictionaryFetch(urbanStr);
+      return formatResponse("Urban Dictionary", r);
+    } catch (e) {
+      console.error(e.message);
+      return `No Urban Dictionary entry found for ${str}`;
+    }
+  }
 
   if (!acronyms[key]) {
     const maybes = findClosest(key);
@@ -120,14 +153,14 @@ export const getDefinition = async (str: string): Promise<string> => {
     }
 
     try {
-      const [wiki, urban] = await Promise.all([wikipediaFetch(str).catch(() => null), urbanDictionaryFetch(str).catch(() => null)]);
-      return [wiki, urban].join('\n');
+      const wiki = await wikipediaFetch(str);
+      return formatResponse('Wikipedia', wiki);
     } catch (e) {
       console.error(e.message);
     }
     return `No definition found for ${str}`;
   }
-  return acronyms[key].map(mrkdwnLink).join('\n');
+  return formatResponse('Okta', acronyms[key].map(mrkdwnLink).join('\n'));
 };
 
 export const findAcronym = (str: string): string => {

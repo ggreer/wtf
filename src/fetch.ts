@@ -12,10 +12,31 @@ export const urbanDictionaryFetch = async (str: string): Promise<string> => {
   }
   const entry = body.list[0];
   const definition = entry.definition.split('\n')[0];
-  return `Urban Dictionary says:\n${definition} <${entry.permalink}|${entry.word}>`;
+  return `${definition} <${entry.permalink}|${entry.word}>`;
 };
 
-// urbanDictionaryFetch("wtf").then(t => console.log(t));
+export const wiktionaryFetch = async (str: string): Promise<string> => {
+  const res = await axios.get(`https://en.wiktionary.org/w/api.php?action=query&prop=extracts&format=json&exintro&exsentences=2&explaintext&titles=${str}`);
+  const { data, status } = res;
+  if (status >= 300) {
+    throw new Error(`Bad status code from Wiktionary: ${res.status}`);
+  }
+  const pages = data?.query?.pages;
+  const pageKey = Object.keys(pages)[0];
+  if (parseInt(pageKey, 10) < 0) {
+    throw new Error("No Wiktionary article.");
+  }
+  const page = pages[pageKey];
+  const $ = cheerio.load(page?.extract);
+  const extract = $.root().text().trim();
+  if (!extract) {
+    throw new Error("Empty Wiktionary extract.");
+  }
+  const link = `https://en.Wiktionary.org/wiki/${page.title}`;
+  return `${extract} <${link}|${page.title}>`;
+};
+
+// wiktionaryFetch("book").then(r => console.log(r));
 
 export const wikipediaFetch = async (str: string): Promise<string> => {
   const res = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&exintro&exsentences=2&explaintext&titles=${str}`);
@@ -35,5 +56,5 @@ export const wikipediaFetch = async (str: string): Promise<string> => {
     throw new Error("Empty Wikipedia extract.");
   }
   const link = `https://en.wikipedia.org/wiki/${page.title}`;
-  return `Wikipedia says:\n${extract} <${link}|${page.title}>`;
+  return `${extract} <${link}|${page.title}>`;
 };

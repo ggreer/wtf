@@ -138,7 +138,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.error(e);
   }
 
-
   // Send a 204 so Slack doesn't get angry at us
   return {
     statusCode: 204,
