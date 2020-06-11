@@ -9,7 +9,7 @@ type Acronym = {
   text: string;
 }
 
-export const acronyms: Record<string, Acronym[]> = {};
+const acronyms: Record<string, Acronym[]> = {};
 
 const $ = cheerio.load(html);
 $('table > tbody').find('tr').each((i, tr) => {
@@ -55,4 +55,14 @@ export const getDefinition = (str: string): string => {
     return `No definition found for ${str}`;
   }
   return acronyms[key].map(mrkdwnLink).join('\n');
+};
+
+export const findAcronym = (str: string): string => {
+  const re = new RegExp(/(is\s+)?(?<acronym>\w+)\??/, 'ig');
+  const matches = re.exec(str);
+  const acronym = matches?.groups?.acronym;
+  if (acronym) {
+    return acronym;
+  }
+  return str;
 };

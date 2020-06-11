@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as crypto from 'crypto';
 import { request } from 'https';
 
-import { getDefinition } from './acronyms';
+import { getDefinition, findAcronym } from './acronyms';
 
 const VERIFICATION_TOKEN: string = process.env.SLACK_VERIFICATION_TOKEN || '';
 const OAUTH_ACCESS_TOKEN: string = process.env.SLACK_OAUTH_ACCESS_TOKEN || '';
@@ -89,7 +89,7 @@ const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
 
   const headers = {
     Authorization: `Bearer ${OAUTH_ACCESS_TOKEN}`,
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8',
     'Content-Length': rawBody.length,
   };
   const req = request(url, { headers, method: "POST" }, res => {
@@ -141,11 +141,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       b.elements.map(element => element.elements?.filter(e => e.type === 'text').forEach(e => e.text && text.push(e.text)));
       return text;
     }, []);
-  // console.log('chunks', chunks);
   const string = chunks.join(' ').trim();
-  console.log(string);
+  const acronym = findAcronym(string);
+  console.log(acronym);
 
-  const definition = getDefinition(string);
+  const definition = getDefinition(acronym);
   console.log('definition', definition);
   await reply(slackEvent, definition);
 
