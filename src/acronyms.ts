@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import levenshtein from 'fast-levenshtein';
 
 import { html } from './html';
-import { fetch } from './wikipedia';
+import { urbanDictionaryFetch, wikipediaFetch } from './fetch';
 
 type Acronym = {
   acronym: string;
@@ -41,7 +41,12 @@ const acronyms: Record<string, Acronym[]> = {
     acronym: "Liverpool",
     oktaOnly: false,
     text: 'Liverpool\'s last league title was in 1990',
-  }]
+  }],
+  wtf: [{
+    acronym: "WTF",
+    oktaOnly: false,
+    text: 'World Taekwondo Federation',
+  }],
 };
 
 const $ = cheerio.load(html);
@@ -114,8 +119,15 @@ export const getDefinition = async (str: string): Promise<string> => {
       return `¿Did you mean?\n${expanded}`;
     }
     try {
-      const msg = await fetch(str);
-      console.log(`message from wikipedia: ${msg}`);
+      const msg = await urbanDictionaryFetch(str);
+      console.log(`message from Urban Dictionary: ${msg}`);
+      return msg;
+    } catch (e) {
+      console.error(e.message);
+    }
+    try {
+      const msg = await wikipediaFetch(str);
+      console.log(`message from Wikipedia: ${msg}`);
       return msg;
     } catch (e) {
       console.error(e.message);
