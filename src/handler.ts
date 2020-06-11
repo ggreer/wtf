@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as crypto from 'crypto';
 import { request } from 'https';
 
-import { acronyms } from './acronyms';
+import { getDefinition } from './acronyms';
 
 const VERIFICATION_TOKEN: string = process.env.SLACK_VERIFICATION_TOKEN || '';
 const OAUTH_ACCESS_TOKEN: string = process.env.SLACK_OAUTH_ACCESS_TOKEN || '';
@@ -71,11 +71,19 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
   return true;
 };
 
-const reply = async (event: SlackEvent, definitions: string[]) => new Promise((a, r) => {
+const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
   const url = new URL(`https://slack.com/api/chat.postMessage`);
   const body = {
     channel: event.channel,
-    text: definitions.join(' OR '),
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text
+        }
+      }
+    ]
   };
 
   const rawBody = JSON.stringify(body);
@@ -139,9 +147,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const string = chunks.join(' ').trim();
   console.log(string);
 
-  const definitions = acronyms[string] || [`No definition found for ${string}`];
-  console.log('definition', definitions);
-  await reply(slackEvent, definitions);
+  const definition = getDefinition(string);
+  console.log('definition', definition);
+  await reply(slackEvent, definition);
   const response = {
     statusCode: 200,
     body: JSON.stringify({ text: 'acronym' }),

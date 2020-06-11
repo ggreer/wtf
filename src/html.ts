@@ -5,17 +5,17 @@ export const html = `<html xmlns="http://www.w3.org/1999/xhtml"><head>
         <meta name="token" content="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJvcmcuc3dpZnQuY29uZmx1ZW5jZS50YWJsZSIsInN1YiI6IjViNDViMmZiYjIyNjU5MmMyMDAzNTRmYSIsImNsaWVudEtleSI6IkNvbmZsdWVuY2U6NTE0NTI3MDA2OCIsImlzcyI6Im9yZy5zd2lmdC5jb25mbHVlbmNlLnRhYmxlIiwiZXhwIjoxNTkxODI3OTU3LCJpYXQiOjE1OTE4MjcwNTd9.5UEmWfg_-PtzvW-oAF5dX8xoGeT8hNwmdtxZMYelj-s">
         <meta name="referrer" content="origin-when-cross-origin">
         
-	    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsnlog/2.20.1/jsnlog.min.js" integrity="sha256-HoC4C7d0QxREE6V2gnkG3XSkhwum8zX3eQXWRy2LX6U=" crossorigin="anonymous"></script>
-	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-	    
-	    <script src="/js/appfire-logging.js"></script>
-	    <script src="/js/table-common.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsnlog/2.20.1/jsnlog.min.js" integrity="sha256-HoC4C7d0QxREE6V2gnkG3XSkhwum8zX3eQXWRy2LX6U=" crossorigin="anonymous"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+      
+      <script src="/js/appfire-logging.js"></script>
+      <script src="/js/table-common.js"></script>
         <script src="/js/table-sorter.js"></script>
         <script src="/js/table-exporter.js"></script>
         <script src="/js/table-filter.js"></script>
         <script src="/js/overrides.js"></script>
-	    <script src="/js/lib/numeral.min.js"></script>
-	    <script src="/js/lib/moment.min.js"></script>              
+      <script src="/js/lib/numeral.min.js"></script>
+      <script src="/js/lib/moment.min.js"></script>              
         <script src="/js/lib/langs.min.js"></script>
         <script src="/js/lib/numeral-langs.min.js"></script>
         <script src="/js/confluence-rest-calls.js"></script>
@@ -23,7 +23,7 @@ export const html = `<html xmlns="http://www.w3.org/1999/xhtml"><head>
         <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/6.0.6/css/aui.css" media="all">
         <link rel="stylesheet" media="all" href="/css/advanced-tables.css">
         <script type="text/javascript" src="https://connect-cdn.atl-paas.net/all.js"></script><style type="text/css">body {margin: 0 !important;}</style>
-	<link type="text/css" rel="stylesheet" media="all" href="//confluence-v1.prod.atl-paas.net/master/aui-reset.css"><link type="text/css" rel="stylesheet" media="all" href="//confluence-v1.prod.atl-paas.net/master/aui-page-typography.css"><link type="text/css" rel="stylesheet" media="all" href="https://oktawiki.atlassian.net/wiki/s/d41d8cd98f00b204e9800998ecf8427e-CDN/-2125750697/h/37561a207d025eb54572de0bb4c2327e/_/download/contextbatch/css/_super/batch.css?externals=__local-default__"></head>
+  <link type="text/css" rel="stylesheet" media="all" href="//confluence-v1.prod.atl-paas.net/master/aui-reset.css"><link type="text/css" rel="stylesheet" media="all" href="//confluence-v1.prod.atl-paas.net/master/aui-page-typography.css"><link type="text/css" rel="stylesheet" media="all" href="https://oktawiki.atlassian.net/wiki/s/d41d8cd98f00b204e9800998ecf8427e-CDN/-2125750697/h/37561a207d025eb54572de0bb4c2327e/_/download/contextbatch/css/_super/batch.css?externals=__local-default__"></head>
     <body class="add-on" data-check-progress="0" data-aui-version="6.1.0">
         <div>
             <script src="/js/table-plus.js"></script>
@@ -35,5 +35,5 @@ export const html = `<html xmlns="http://www.w3.org/1999/xhtml"><head>
 
         <!-- Helper Javascript lib -->
         <script type="text/javascript" src="/js/appfire.js"></script>
-    
-</body></html>`;
+
+</body>;</html>`;
