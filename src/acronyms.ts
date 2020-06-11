@@ -118,17 +118,10 @@ export const getDefinition = async (str: string): Promise<string> => {
       const expanded = maybes.map(m => acronyms[m].map(mrkdwnLink)).join('\n');
       return `¿Did you mean?\n${expanded}`;
     }
+
     try {
-      const msg = await urbanDictionaryFetch(str);
-      console.log(`message from Urban Dictionary: ${msg}`);
-      return msg;
-    } catch (e) {
-      console.error(e.message);
-    }
-    try {
-      const msg = await wikipediaFetch(str);
-      console.log(`message from Wikipedia: ${msg}`);
-      return msg;
+      const [wiki, urban] = await Promise.all([wikipediaFetch(str).catch(() => null), urbanDictionaryFetch(str).catch(() => null)]);
+      return [wiki, urban].join('\n');
     } catch (e) {
       console.error(e.message);
     }

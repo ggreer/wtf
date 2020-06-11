@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as crypto from 'crypto';
-import { request } from 'https';
+import axios from 'axios';
 
 import { getDefinition, findAcronym } from './acronyms';
 
@@ -70,38 +70,21 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
   return true;
 };
 
-const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
-  const url = new URL("https://slack.com/api/chat.postMessage");
-  const body = {
-    channel: event.channel,
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text,
-        }
+const reply = (event: SlackEvent, text: string) => axios.post("https://slack.com/api/chat.postMessage", {
+  channel: event.channel,
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text,
       }
-    ]
-  };
-
-  const rawBody = JSON.stringify(body);
-
-  const headers = {
+    }
+  ]
+}, {
+  headers: {
     Authorization: `Bearer ${OAUTH_ACCESS_TOKEN}`,
-    'Content-Type': 'application/json; charset=UTF-8',
-  };
-  const req = request(url, { headers, method: "POST" }, res => {
-    res.on('data', chunk => { console.log(`Response: ${chunk}`); });
-    res.on('end', a);
-  });
-  req.on('error', e => {
-    console.error(e.message);
-    r(e);
-  });
-  console.log(rawBody);
-  req.write(rawBody);
-  req.end();
+  }
 });
 
 
@@ -147,7 +130,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const definition = await getDefinition(acronym);
   console.log('definition', definition);
-  await reply(slackEvent, definition);
+
+  try {
+    const res = await reply(slackEvent, definition);
+    console.log(JSON.stringify(res.data));
+  } catch (e) {
+    console.error(e);
+  }
+
 
   // Send a 204 so Slack doesn't get angry at us
   return {
