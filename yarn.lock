@@ -115,6 +115,11 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/fast-levenshtein@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@types/fast-levenshtein/-/fast-levenshtein-0.0.1.tgz#3a3615cf173645c8fca58d051e4e32824e4bd286"
+  integrity sha1-OjYVzxc2Rcj8pY0FHk4ygk5L0oY=
+
 "@types/glob@^7.1.1":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.2.tgz#06ca26521353a545d94a0adc74f38a59d232c987"

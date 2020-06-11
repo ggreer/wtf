@@ -71,7 +71,7 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
 };
 
 const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
-  const url = new URL(`https://slack.com/api/chat.postMessage`);
+  const url = new URL("https://slack.com/api/chat.postMessage");
   const body = {
     channel: event.channel,
     blocks: [
@@ -79,7 +79,7 @@ const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
         type: "section",
         text: {
           type: "mrkdwn",
-          text
+          text,
         }
       }
     ]
@@ -90,16 +90,16 @@ const reply = async (event: SlackEvent, text: string) => new Promise((a, r) => {
   const headers = {
     Authorization: `Bearer ${OAUTH_ACCESS_TOKEN}`,
     'Content-Type': 'application/json; charset=UTF-8',
-    'Content-Length': rawBody.length,
   };
   const req = request(url, { headers, method: "POST" }, res => {
     res.on('data', chunk => { console.log(`Response: ${chunk}`); });
-    res.on('close', a);
+    res.on('end', a);
   });
   req.on('error', e => {
     console.error(e.message);
     r(e);
   });
+  console.log(rawBody);
   req.write(rawBody);
   req.end();
 });
@@ -145,7 +145,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const acronym = findAcronym(string);
   console.log(acronym);
 
-  const definition = getDefinition(acronym);
+  const definition = await getDefinition(acronym);
   console.log('definition', definition);
   await reply(slackEvent, definition);
 
