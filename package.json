@@ -32,6 +32,9 @@
   },
   "eslintConfig": {
     "extends": "eslint-config-okta",
+    "ignorePatterns": [
+      "dist/"
+    ],
     "rules": {
       "no-console": "off"
     }
