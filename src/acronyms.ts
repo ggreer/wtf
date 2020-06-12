@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import levenshtein from 'fast-levenshtein';
 
 import { html } from './html';
-import { urbanDictionaryFetch, wikipediaFetch } from './fetch';
+import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch } from './fetch';
 
 type Acronym = {
   acronym: string;
@@ -109,22 +109,24 @@ const findClosest = (needle: string): string[] => {
     closest.push(k);
   });
 
-  return lowScore <= needle.length / 4
-    ? closest.slice(0, 2)
+  return lowScore <= needle.length / 3
+    ? closest.slice(0, 10)
     : [];
 };
 
 const formatResponse = (authority: string, msg: string) => `_${authority}_ says:\n${msg}`;
 
+const help = `Find out things. Usage:
+\`@wtf [query]\`
+@wtf searches <https://oktawiki.atlassian.net/wiki/spaces/DOC/pages/229815001/WTHDTAM+AKA+That+Acronym+List|WTHDTAM+AKA+That+Acronym+List> and falls back to Wikipedia, then Wiktionary if it can't find anything.
+\`@wtf random\` gets a random acronym.
+\`@wtf urban [query]\` searches Urban Dictionary (be careful!)`;
+
 export const getDefinition = async (str: string): Promise<string> => {
   const key = str.toLowerCase();
 
   if (key === 'help') {
-    return 'see @wtf man';
-  }
-
-  if (key === 'man') {
-    return 'todo';
+    return help;
   }
 
   if (key === 'random' || key === 'rand') {
@@ -158,6 +160,14 @@ export const getDefinition = async (str: string): Promise<string> => {
     } catch (e) {
       console.error(e.message);
     }
+
+    try {
+      const wiki = await wiktionaryFetch(str);
+      return formatResponse('Wiktionary', wiki);
+    } catch (e) {
+      console.error(e.message);
+    }
+
     return `No definition found for ${str}`;
   }
   return formatResponse('Okta', acronyms[key].map(mrkdwnLink).join('\n'));

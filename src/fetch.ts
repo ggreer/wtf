@@ -15,8 +15,10 @@ export const urbanDictionaryFetch = async (str: string): Promise<string> => {
   return `${definition} <${entry.permalink}|${entry.word}>`;
 };
 
+const wikiToSlack = (wiki: string) => wiki.replace(/( +)?===( +)?/g, '*').replace(/( +)?==( +)?/g, '_').slice(0, 2000);
+
 export const wiktionaryFetch = async (str: string): Promise<string> => {
-  const res = await axios.get(`https://en.wiktionary.org/w/api.php?action=query&prop=extracts&format=json&exintro&exsentences=2&explaintext&titles=${str}`);
+  const res = await axios.get(`https://en.wiktionary.org/w/api.php?action=query&prop=extracts&exlimit=1&format=json&exsentences=5&explaintext&titles=${str}`);
   const { data, status } = res;
   if (status >= 300) {
     throw new Error(`Bad status code from Wiktionary: ${res.status}`);
@@ -28,7 +30,7 @@ export const wiktionaryFetch = async (str: string): Promise<string> => {
   }
   const page = pages[pageKey];
   const $ = cheerio.load(page?.extract);
-  const extract = $.root().text().trim();
+  const extract = wikiToSlack($.root().text().trim());
   if (!extract) {
     throw new Error("Empty Wiktionary extract.");
   }
@@ -36,10 +38,8 @@ export const wiktionaryFetch = async (str: string): Promise<string> => {
   return `${extract} <${link}|${page.title}>`;
 };
 
-// wiktionaryFetch("book").then(r => console.log(r));
-
 export const wikipediaFetch = async (str: string): Promise<string> => {
-  const res = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&exintro&exsentences=2&explaintext&titles=${str}`);
+  const res = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts|categories&exlimit=1&format=json&exsentences=2&explaintext&titles=${str}`);
   const { data, status } = res;
   if (status >= 300) {
     throw new Error(`Bad status code from Wikipedia: ${res.status}`);
@@ -51,7 +51,7 @@ export const wikipediaFetch = async (str: string): Promise<string> => {
   }
   const page = pages[pageKey];
   const $ = cheerio.load(page?.extract);
-  const extract = $.root().text().trim();
+  const extract = wikiToSlack($.root().text().trim());
   if (!extract) {
     throw new Error("Empty Wikipedia extract.");
   }

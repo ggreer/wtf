@@ -110,6 +110,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
   const slackEvent: SlackEvent = body.event;
   if (slackEvent.type !== 'app_mention') {
+    console.log(JSON.stringify(body));
     // Don't care.
     return {
       statusCode: 204,
