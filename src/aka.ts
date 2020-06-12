@@ -22,9 +22,9 @@ const auth = {
 
 export const refresh = async () => {
   const res = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/229815001/history/`, { auth });
-  const remoteVersion = res.data.lastUpdated.number;
-  console.log(remoteVersion);
-  const { data } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/229815001/history/${remoteVersion}/macro/id/44764e27-edd0-4d3c-9769-7353d080e6eb`, { auth });
+  const version = res.data.lastUpdated.number;
+  console.log(version);
+  const { data } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/229815001/history/${version}/macro/id/44764e27-edd0-4d3c-9769-7353d080e6eb`, { auth });
   const $ = cheerio.load(data.body);
   const acronyms: acronyms = {};
   $('table > tbody').find('tr').each((i, tr) => {
@@ -50,6 +50,7 @@ export const refresh = async () => {
       acronyms[key].push(value);
     }
   });
+
   console.log("PUTTING");
   await s3.putObject({
     Bucket: S3_BUCKET,
@@ -57,10 +58,11 @@ export const refresh = async () => {
     Body: JSON.stringify(acronyms),
     ContentType: "application/json",
     Metadata: {
-      version: remoteVersion.toString(),
+      version: version.toString(),
     }
   }).promise();
-  return acronyms;
+
+  return { acronyms, version };
 };
 
 export const get = async (acronyms: Record<string, acronym[]>): Promise<acronyms> => {

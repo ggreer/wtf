@@ -1,6 +1,6 @@
 import levenshtein from 'fast-levenshtein';
 
-import { acronym as acronymType, acronyms as acronymsType, refresh, get } from './aka';
+import { acronym as acronymType, acronyms as acronymsType, get } from './aka';
 import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch } from './fetch';
 
 const initialAcronyms: acronymsType = {
@@ -94,16 +94,6 @@ export const getDefinition = async (str: string): Promise<string> => {
 
   if (key === 'help') {
     return help;
-  }
-
-  if (key === 'refresh') {
-    try {
-      await refresh();
-    } catch (e) {
-      console.error(e);
-      return `FAILURE: ${e.message}`;
-    }
-    return 'Successfully updated.';
   }
 
   const acronyms = await get(initialAcronyms);

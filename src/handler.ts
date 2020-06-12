@@ -3,7 +3,8 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 
 import { getDefinition, findAcronym } from './acronyms';
-import { VERIFICATION_TOKEN, OAUTH_ACCESS_TOKEN, SIGNING_SECRET } from './config';
+import { OAUTH_ACCESS_TOKEN, VERIFICATION_TOKEN, SIGNING_SECRET } from './config';
+import { refresh } from './aka';
 
 type SlackElement = {
   type: string;
@@ -68,7 +69,7 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
   return true;
 };
 
-const reply = (event: SlackEvent, text: string) => axios.post("https://slack.com/api/chat.postMessage", {
+const message = (event: SlackEvent, text: string) => axios.post("https://slack.com/api/chat.postMessage", {
   channel: event.channel,
   thread_ts: event.thread_ts,
   // TODO: add text field for notifications
@@ -86,7 +87,6 @@ const reply = (event: SlackEvent, text: string) => axios.post("https://slack.com
     Authorization: `Bearer ${OAUTH_ACCESS_TOKEN}`,
   }
 });
-
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const body: Body = JSON.parse(event.body ?? '{}');
@@ -107,6 +107,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       headers: { 'content-type': 'text/plain' },
       body: body?.challenge,
     };
+  }
+
+  if (event.headers['X-Slack-Retry-Num'])  {
+    console.log(`will not retry a refresh! ${event.headers['X-Slack-Retry-Num']}`);
+    return { statusCode: 204, body: '' };
   }
 
   const slackEvent: SlackEvent = body.event;
@@ -130,12 +135,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const acronym = findAcronym(string);
   console.log(acronym);
+  if (acronym === 'refresh') {
+    message(slackEvent, 'Updating...');
+    try {
+      const { acronyms, version } = await refresh();
+      await message(slackEvent, `Successfully updated to version ${version} with ${Object.keys(acronyms).length} definitions.`);
+    } catch (e) {
+      console.error(e);
+      await message(slackEvent, `FAILURE: ${e.message}`);
+    }
+    return {
+      statusCode: 204,
+      body: '',
+    };
+  }
 
   const definition = await getDefinition(acronym);
   console.log('definition', definition);
 
   try {
-    const res = await reply(slackEvent, definition);
+    const res = await message(slackEvent, definition);
     console.log(JSON.stringify(res.data));
   } catch (e) {
     console.error(e);
