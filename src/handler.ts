@@ -3,10 +3,7 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 
 import { getDefinition, findAcronym } from './acronyms';
-
-const VERIFICATION_TOKEN: string = process.env.SLACK_VERIFICATION_TOKEN || '';
-const OAUTH_ACCESS_TOKEN: string = process.env.SLACK_OAUTH_ACCESS_TOKEN || '';
-const SIGNING_SECRET: string = process.env.SLACK_SIGNING_SECRET || '';
+import { VERIFICATION_TOKEN, OAUTH_ACCESS_TOKEN, SIGNING_SECRET } from './config';
 
 type SlackElement = {
   type: string;
@@ -31,6 +28,7 @@ type SlackEvent = {
   blocks: SlackBlock[];
   channel: string;
   event_ts: string;
+  thread_ts: string;
 }
 
 type Body = {
@@ -72,6 +70,8 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
 
 const reply = (event: SlackEvent, text: string) => axios.post("https://slack.com/api/chat.postMessage", {
   channel: event.channel,
+  thread_ts: event.thread_ts,
+  // TODO: add text field for notifications
   blocks: [
     {
       type: "section",
@@ -108,6 +108,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       body: body?.challenge,
     };
   }
+
   const slackEvent: SlackEvent = body.event;
   if (slackEvent.type !== 'app_mention') {
     console.log(JSON.stringify(body));
@@ -126,6 +127,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return text;
     }, []);
   const string = chunks.join(' ').trim();
+
   const acronym = findAcronym(string);
   console.log(acronym);
 

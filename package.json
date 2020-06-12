@@ -13,6 +13,7 @@
     "upload": "yarn build && cd dist && zip ../dist.zip --filesync -r . && cd .. && aws lambda update-function-code --function-name wtf --zip-file=fileb://dist.zip"
   },
   "dependencies": {
+    "aws-sdk": "^2.695.0",
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
     "fast-levenshtein": "^2.0.6"

@@ -1,17 +1,9 @@
-import cheerio from 'cheerio';
 import levenshtein from 'fast-levenshtein';
 
-import { html } from './html';
+import { acronym as acronymType, acronyms as acronymsType, refresh, get } from './aka';
 import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch } from './fetch';
 
-type Acronym = {
-  acronym: string;
-  link?: string;
-  oktaOnly: boolean;
-  text: string | (() => string);
-}
-
-const acronyms: Record<string, Acronym[]> = {
+const initialAcronyms: acronymsType = {
   life: [{
     acronym: 'life',
     oktaOnly: false,
@@ -54,32 +46,7 @@ const acronyms: Record<string, Acronym[]> = {
   }],
 };
 
-const $ = cheerio.load(html);
-$('table > tbody').find('tr').each((i, tr) => {
-  const tds = $(tr).find('td');
-  if (!tds.length) {
-    return;
-  }
-  const acronym = $(tds.get(0)).text();
-  const valueElem = $(tds).get(1);
-  const value = {
-    acronym,
-    text: $(valueElem).text(),
-    link: $(valueElem).find('a').attr('href'),
-    oktaOnly: $(tds.get(2)).find('img').length > 0,
-  };
-  if (!tds.length) {
-    return;
-  }
-  const key = acronym.toLowerCase();
-  if (!acronyms[key]) {
-    acronyms[key] = [value];
-  } else {
-    acronyms[key].push(value);
-  }
-});
-
-const mrkdwnLink = ({ acronym, link, text, oktaOnly }: Acronym) => {
+const mrkdwnLink = ({ acronym, link, text, oktaOnly }: acronymType) => {
   let msg;
   text = typeof text === 'function' ? text() : text;
   if (link) {
@@ -93,7 +60,7 @@ const mrkdwnLink = ({ acronym, link, text, oktaOnly }: Acronym) => {
   return msg;
 };
 
-const findClosest = (needle: string): string[] => {
+const findClosest = (acronyms: acronymsType, needle: string): string[] => {
   let closest: string[] = [];
   let lowScore = Infinity;
   Object.keys(acronyms).forEach(k => {
@@ -129,6 +96,18 @@ export const getDefinition = async (str: string): Promise<string> => {
     return help;
   }
 
+  if (key === 'refresh') {
+    try {
+      await refresh();
+    } catch (e) {
+      console.error(e);
+      return `FAILURE: ${e.message}`;
+    }
+    return 'Successfully updated.';
+  }
+
+  const acronyms = await get(initialAcronyms);
+
   if (key === 'random' || key === 'rand') {
     const keys = Object.keys(acronyms);
     return getDefinition(keys[Math.floor(keys.length * Math.random())]);
@@ -148,7 +127,7 @@ export const getDefinition = async (str: string): Promise<string> => {
   }
 
   if (!acronyms[key]) {
-    const maybes = findClosest(key);
+    const maybes = findClosest(acronyms, key);
     if (maybes.length) {
       const expanded = maybes.map(m => acronyms[m].map(mrkdwnLink)).join('\n');
       return `¿Did you mean?\n${expanded}`;
