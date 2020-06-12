@@ -4,16 +4,6 @@ import { acronym as acronymType, acronyms as acronymsType, get } from './aka';
 import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch } from './fetch';
 
 const initialAcronyms: acronymsType = {
-  life: [{
-    acronym: 'life',
-    oktaOnly: false,
-    text: 'I don\'t know. Ask Samer.',
-  }],
-  taha: [{
-    acronym: 'Taha',
-    oktaOnly: false,
-    text: 'Taha Teke is the GOAT!',
-  }],
   lafuta: [{
     acronym: 'LAFUTA',
     oktaOnly: false,
@@ -26,10 +16,10 @@ const initialAcronyms: acronymsType = {
       ? ':larsipoo:'
       : 'a :poop: from :flag-no:',
   }],
-  "samer's favorite champagne": [{
-    acronym: "Samer's favorite champagne",
+  life: [{
+    acronym: 'life',
     oktaOnly: false,
-    text: 'Veuve Clicquot',
+    text: 'I don\'t know. Ask Samer.',
   }],
   liverpool: [{
     acronym: "Liverpool",
@@ -37,6 +27,21 @@ const initialAcronyms: acronymsType = {
     text: () => Math.random() > 0.5
       ? 'Liverpool\'s last league title was in 1990.'
       : 'The best Football club in the world!',
+  }],
+  lstfu: [{
+    acronym: 'LSTFU',
+    oktaOnly: true,
+    text: 'Oh.. yeah... about that. Ask :hans:',
+  }],
+  "samer's favorite champagne": [{
+    acronym: "Samer's favorite champagne",
+    oktaOnly: false,
+    text: 'Veuve Clicquot',
+  }],
+  taha: [{
+    acronym: 'Taha',
+    oktaOnly: false,
+    text: 'Taha Teke is the GOAT!',
   }],
   wtf: [{
     acronym: "WTF",
