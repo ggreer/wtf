@@ -1,7 +1,7 @@
 import levenshtein from 'fast-levenshtein';
 
 import { acronym as acronymType, acronyms as acronymsType, get } from './aka';
-import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch } from './fetch';
+import { urbanDictionaryFetch, wikipediaFetch, wiktionaryFetch, stonksFetch } from './fetch';
 
 const initialAcronyms: acronymsType = {
   lafuta: [{
@@ -90,9 +90,24 @@ const formatResponse = (authority: string, msg: string) => `_${authority}_ says:
 
 const help = `Find out things. Usage:
 \`@wtf [query]\`
-@wtf searches <https://oktawiki.atlassian.net/wiki/spaces/DOC/pages/229815001/WTHDTAM+AKA+That+Acronym+List|WTHDTAM+AKA+That+Acronym+List> and falls back to Wikipedia, then Wiktionary if it can't find anything.
+@wtf searches <https://oktawiki.atlassian.net/wiki/spaces/DOC/pages/229815001/WTHDTAM+AKA+That+Acronym+List|WTHDTAM+AKA+That+Acronym+List> and falls back to <https://oktawiki.atlassian.net/wiki/spaces/~424152769/pages/1108724556/WTF+Bot+Data|WTF Bot Data>, then Wikipedia, then Wiktionary.
 \`@wtf random\` gets a random acronym.
-\`@wtf urban [query]\` searches Urban Dictionary (be careful!)`;
+\`@wtf $[ticker]\` searches Yahoo Finance
+\`@wtf stonks [ticker]\` searches Yahoo Finance
+\`@wtf urban [query]\` searches Urban Dictionary (be careful!)
+\`@wtf wikipedia [query]\` searches Wikipedia
+\`@wtf wiktionary [query]\` searches Wiktionary
+Don't forget to <https://okta.circlehd.com/view/WTF-A-Slack-Bot-For-Acronyms-1bg5sQLwoO|Vote for WTF> in the Hackathon!`;
+
+
+const runCommand = async (authority: string, fetcher: (args: string) => Promise<string>, args: string) => {
+  try {
+    return formatResponse(authority, await fetcher(args));
+  } catch (e) {
+    console.error(e.message);
+    return `No ${authority} entry found for ${args}`;
+  }
+};
 
 export const getDefinition = async (str: string): Promise<string> => {
   const key = str.toLowerCase();
@@ -108,17 +123,21 @@ export const getDefinition = async (str: string): Promise<string> => {
     return getDefinition(keys[Math.floor(keys.length * Math.random())]);
   }
 
-  const re = new RegExp(/(urban\s+)(?<urbanStr>[^?]+)\??/, 'g');
+  const re = new RegExp(/(\$(?<stonk>[\w-]+$))|(^(?<command>\w+)\s+)(?<args>[^?]+)\??/, 'g');
   const matches = re.exec(str);
-  const urbanStr = matches?.groups?.urbanStr;
-  if (urbanStr) {
-    try {
-      const r = await urbanDictionaryFetch(urbanStr);
-      return formatResponse("Urban Dictionary", r);
-    } catch (e) {
-      console.error(e.message);
-      return `No Urban Dictionary entry found for ${str}`;
-    }
+  const { command, args, stonk } = matches?.groups || {};
+  if (stonk) {
+    return runCommand('Yahoo Finance', stonksFetch, stonk);
+  }
+  switch (command) {
+    case 'urban':
+      return runCommand("Urban Dictionary", urbanDictionaryFetch, args);
+    case 'stonks':
+      return runCommand('Yahoo Finance', stonksFetch, args);
+    case 'wikipedia':
+      return runCommand("Wikipedia", wikipediaFetch, args);
+    case 'wiktionary':
+      return runCommand('Wiktionary', wiktionaryFetch, args);
   }
 
   if (!acronyms[key]) {

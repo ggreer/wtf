@@ -1,5 +1,17 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
+// @ts-ignore
+import yf from 'yahoo-finance';
+// @ts-ignore
+export const stonksFetch = async (ticker: string): Promise<string> => yf.quote({ symbol: ticker })
+  .then(({ price }: { price: any }) => {
+    const { regularMarketPrice, regularMarketChange, regularMarketChangePercent } = price || {};
+    const percent = Math.round(regularMarketChangePercent * 100);
+    const humanized = (regularMarketChange > 0 ? ':money_printer_brrr:' : ':burning-money:').repeat(Math.abs(percent));
+    const plus = regularMarketChange > 0 ? '+' : '';
+
+    return `${price.symbol} ${regularMarketPrice} ${plus}${regularMarketChange.toFixed(2)} (${plus}${percent}%) ${humanized}`;
+  });
 
 export const urbanDictionaryFetch = async (str: string): Promise<string> => {
   const res = await axios.get(`https://api.urbandictionary.com/v0/define?term=${str}`);
