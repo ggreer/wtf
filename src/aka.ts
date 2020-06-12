@@ -19,13 +19,20 @@ const auth = {
   password: ATLASSIAN_API_TOKEN,
 };
 
+const PAGE_ID = 229815001;
 
 export const refresh = async () => {
-  const res = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/229815001/history/`, { auth });
+  const res = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${PAGE_ID}/history/`, { auth });
   const version = res.data.lastUpdated.number;
-  console.log(version);
-  const { data } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/229815001/history/${version}/macro/id/44764e27-edd0-4d3c-9769-7353d080e6eb`, { auth });
-  const $ = cheerio.load(data.body);
+  const { data: unexpandedData } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${PAGE_ID}/history/${version}/macro/id/44764e27-edd0-4d3c-9769-7353d080e6eb`, { auth });
+
+  const { data: expandedData } = await axios.post(`https://${CONFLUENCE_HOST}/wiki/rest/api/contentbody/convert/view?expand=webresource.superbatch.uris.css,webresource.superbatch.uris.js,webresource.tags.all,webresource.uris.css,webresource.uris.js&_r=${Date.now()}`, {
+    value: unexpandedData.body,
+    content: { id: PAGE_ID },
+    representation: "storage",
+  }, { auth });
+
+  const $ = cheerio.load(expandedData.value);
   const acronyms: acronyms = {};
   $('table > tbody').find('tr').each((i, tr) => {
     const tds = $(tr).find('td');
@@ -33,11 +40,15 @@ export const refresh = async () => {
       return;
     }
     const acronym = $(tds.get(0)).text();
-    const valueElem = $(tds).get(1);
+    const text = $(tds.get(1)).text();
+    let link = $(tds.get(1)).find('a').attr('href');
+    if (link?.startsWith('/')) {
+      link = `https://${CONFLUENCE_HOST}${link}`;
+    }
     const value = {
       acronym,
-      text: $(valueElem).text(),
-      link: $(valueElem).find('a').attr('href'),
+      text,
+      link,
       oktaOnly: $(tds.get(2)).find('img').length > 0,
     };
     if (!tds.length) {
@@ -51,7 +62,6 @@ export const refresh = async () => {
     }
   });
 
-  console.log("PUTTING");
   await s3.putObject({
     Bucket: S3_BUCKET,
     Key: 'table.json',
@@ -61,7 +71,6 @@ export const refresh = async () => {
       version: version.toString(),
     }
   }).promise();
-
   return { acronyms, version };
 };
 
@@ -77,4 +86,4 @@ export const get = async (acronyms: Record<string, acronym[]>): Promise<acronyms
   return { ...obj, ...acronyms };
 };
 
-// get({}).then(a => console.dir(a));
+// refresh().then(a => console.dir(a.acronyms));
