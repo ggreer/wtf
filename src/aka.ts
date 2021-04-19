@@ -71,7 +71,7 @@ const refreshWTHDTAM = async (): Promise<confluenceData> => {
 
   const res = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${WTHDTAM_PAGE_ID}/history/`, { auth });
   const version = res.data.lastUpdated.number;
-  const { data: unexpandedData } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${WTHDTAM_PAGE_ID}/history/${version}/macro/id/44764e27-edd0-4d3c-9769-7353d080e6eb`, { auth });
+  const { data: unexpandedData } = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${WTHDTAM_PAGE_ID}/history/${version}/macro/id/16ae930d-8e1e-41f2-94c6-0d75d04c8328`, { auth });
 
   const { data: expandedData } = await expandData(WTHDTAM_PAGE_ID, unexpandedData.body);
 
