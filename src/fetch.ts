@@ -9,8 +9,9 @@ export const stonksFetch = async (ticker: string): Promise<string> => yf.quote({
     const percent = Math.round(regularMarketChangePercent * 100);
     const humanized = (regularMarketChange > 0 ? ':money_printer_brrr:' : ':burning-money:').repeat(Math.abs(percent));
     const plus = regularMarketChange > 0 ? '+' : '';
+    const url = `https://finance.yahoo.com/quote/${price.symbol}`;
 
-    return `${price.symbol} ${regularMarketPrice} ${plus}${regularMarketChange.toFixed(2)} (${plus}${percent}%) ${humanized}`;
+    return `${price.symbol} ${regularMarketPrice} ${plus}${regularMarketChange.toFixed(2)} (${plus}${percent}%) ${url} ${humanized}`;
   });
 
 export const urbanDictionaryFetch = async (str: string): Promise<string> => {
