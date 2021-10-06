@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 
 import { getDefinition, findAcronym } from './acronyms';
-import { OAUTH_ACCESS_TOKEN, VERIFICATION_TOKEN, SIGNING_SECRET } from './config';
+import { OAUTH_ACCESS_TOKEN, SIGNING_SECRET } from './config';
 import { refresh } from './aka';
 
 type SlackElement = {
@@ -63,9 +63,7 @@ const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
   if (body.type !== 'url_verification') {
     return false;
   }
-  if (body.token !== VERIFICATION_TOKEN) {
-    return false;
-  }
+
   return true;
 };
 
@@ -93,7 +91,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const signature = event.headers['X-Slack-Signature'];
   const timestamp = event.headers['X-Slack-Request-Timestamp'];
 
-  // console.log(signature, timestamp);
+  console.log(signature, timestamp);
   if (!verifySignature(signature, timestamp, event.body ?? '')) {
     return {
       statusCode: 401,
@@ -102,6 +100,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   if (isChallenge(event, body)) {
+    console.log("is challenge event ${JSON.stringify(event)}");
+
     return {
       statusCode: 200,
       headers: { 'content-type': 'text/plain' },
