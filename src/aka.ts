@@ -111,8 +111,11 @@ const refreshWTHDTAM = async (): Promise<confluenceData> => {
 const s3 = new AWS.S3();
 
 export const refresh = async () => {
+  console.log("REFRESHING");
+
   const [wthdtam, anarchy] = await Promise.all([refreshWTHDTAM(), refreshAnarchy()]);
   const acronyms = { ...anarchy.acronyms, ...wthdtam.acronyms };
+
   await s3.putObject({
     Bucket: S3_BUCKET,
     Key: 'table.json',
@@ -127,6 +130,7 @@ export const refresh = async () => {
 
 export const get = async (acronyms: Record<string, acronym[]>): Promise<acronyms> => {
   console.log("GETTING");
+
   const data = await s3.getObject({
     Bucket: S3_BUCKET,
     Key: 'table.json',
