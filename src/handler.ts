@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 
 import { getDefinition, findAcronym } from './acronyms';
-import { OAUTH_ACCESS_TOKEN, SIGNING_SECRET } from './config';
+import { DEV_MODE, OAUTH_ACCESS_TOKEN, SIGNING_SECRET } from './config';
 import { refresh } from './aka';
 
 type SlackElement = {
@@ -50,14 +50,10 @@ const verifySignature = (signature='', timestamp='', body='') => {
   hmac.update(`${version}:${timestamp}:${body}`);
   const a = Buffer.from(hash ?? '', 'hex');
   const b = hmac.digest();
-  if (DEV_MODE) {
-    return true;
-  } else {
-    if (a.length !== b.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(a, b);
+  if (a.length !== b.length) {
+    return false;
   }
+  return crypto.timingSafeEqual(a, b);
 };
 
 const isChallenge = (event: APIGatewayProxyEvent, body: Body) => {
@@ -92,15 +88,18 @@ const message = (event: SlackEvent, text: string) => axios.post("https://slack.c
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const body: Body = JSON.parse(event.body ?? '{}');
-  const signature = event.headers['X-Slack-Signature'];
-  const timestamp = event.headers['X-Slack-Request-Timestamp'];
+  console.log("body:", body);
+  if (! DEV_MODE) {
+    const signature = event.headers['X-Slack-Signature'];
+    const timestamp = event.headers['X-Slack-Request-Timestamp'];
 
-  console.log("signature: ", signature, ", timestamp: ", timestamp);
-  if (!verifySignature(signature, timestamp, event.body ?? '')) {
-    return {
-      statusCode: 401,
-      body: 'Signature verification failed. You are not Slack!',
-    };
+    console.log("signature:", signature, ", timestamp:", timestamp);
+    if (!verifySignature(signature, timestamp, event.body ?? '')) {
+      return {
+        statusCode: 401,
+        body: 'Signature verification failed. You are not Slack!',
+      };
+    }
   }
 
   if (isChallenge(event, body)) {
@@ -121,9 +120,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const slackEvent: SlackEvent = body.event;
-  if (slackEvent.type !== 'app_mention' && slackEvent.type !== 'message.im') {
-    console.log("body: ", JSON.stringify(body));
-    // Don't care.
+  if (slackEvent.type !== 'app_mention' && slackEvent.type !== 'message') {
+    console.log("ignoring event type:", slackEvent.type);
+
+    // Don't care
     return {
       statusCode: 204,
       body: '',
@@ -140,14 +140,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const string = chunks.join(' ').trim();
 
   const acronym = findAcronym(string);
-  console.log("acronym: ", acronym);
+  console.log("acronym:", acronym);
   if (acronym === 'refresh') {
-    message(slackEvent, 'Updating...');
+    message(slackEvent, 'Updating acronym list...');
+
     try {
       const { acronyms, version } = await refresh();
+
       await message(slackEvent, `Successfully updated to version ${version} with ${Object.keys(acronyms).length} definitions.`);
     } catch (e) {
-      console.error(e);
+      console.log("refresh error:", e);
+      console.log("refresh error message:", e.message);
+
       await message(slackEvent, `FAILURE: ${e.message}`);
     }
     return {
@@ -161,9 +165,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const res = await message(slackEvent, definition);
-    console.log("response data: ", JSON.stringify(res.data));
+    console.log("response data:", JSON.stringify(res.data));
   } catch (e) {
-    console.error(e);
+    console.log("slack message error:", e);
   }
 
   // Send a 204 so Slack doesn't get angry at us

@@ -88,7 +88,8 @@ const findClosest = (acronyms: acronymsType, needle: string): string[] => {
 
 const formatResponse = (authority: string, msg: string) => `_${authority}_ says:\n${msg}`;
 
-const help = `Find out things. Usage:
+const help = `Find out things.
+Usage:
 \`@wtf [query]\`
 @wtf searches <https://oktawiki.atlassian.net/wiki/spaces/DOC/pages/229815001/WTHDTAM+AKA+That+Acronym+List|WTHDTAM+AKA+That+Acronym+List> and falls back to <https://oktawiki.atlassian.net/wiki/spaces/~424152769/pages/1108724556/WTF+Bot+Data|WTF Bot Data>, then Wikipedia, then Wiktionary.
 \`@wtf random\` gets a random acronym.
@@ -104,7 +105,7 @@ const runCommand = async (authority: string, fetcher: (args: string) => Promise<
   try {
     return formatResponse(authority, await fetcher(args));
   } catch (e) {
-    console.error(e.message);
+    console.log(e.message);
     return `No ${authority} entry found for ${args}`;
   }
 };
@@ -151,14 +152,14 @@ export const getDefinition = async (str: string): Promise<string> => {
       const wiki = await wikipediaFetch(str);
       return formatResponse('Wikipedia', wiki);
     } catch (e) {
-      console.error(e.message);
+      console.log(e.message);
     }
 
     try {
       const wiki = await wiktionaryFetch(str);
       return formatResponse('Wiktionary', wiki);
     } catch (e) {
-      console.error(e.message);
+      console.log(e.message);
     }
 
     return `No definition found for ${str}`;
