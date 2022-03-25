@@ -29,7 +29,7 @@ const refreshAnarchy = async (): Promise<confluenceData> => {
   const ANARCHY_PAGE_ID = 1108724556;
   const res = await axios.get(`https://${CONFLUENCE_HOST}/wiki/rest/api/content/${ANARCHY_PAGE_ID}?expand=body.storage,version`, { auth });
   const version = res.data.version.number;
-  console.log(version);
+  console.log("version ", version);
 
   const { data: expandedData } = await expandData(ANARCHY_PAGE_ID, res.data.body.storage.value);
   const $ = cheerio.load(expandedData.value);

@@ -91,7 +91,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const signature = event.headers['X-Slack-Signature'];
   const timestamp = event.headers['X-Slack-Request-Timestamp'];
 
-  console.log(signature, timestamp);
+  console.log("signature: ", signature, ", timestamp: ", timestamp);
   if (!verifySignature(signature, timestamp, event.body ?? '')) {
     return {
       statusCode: 401,
@@ -115,7 +115,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const slackEvent: SlackEvent = body.event;
-  if (slackEvent.type !== 'app_mention') {
+  if (slackEvent.type !== 'app_mention' && slackEvent.type !== 'message.im') {
     console.log(JSON.stringify(body));
     // Don't care.
     return {
