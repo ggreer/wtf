@@ -110,13 +110,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   if (event.headers['X-Slack-Retry-Num'])  {
-    console.log(`will not retry a refresh! ${event.headers['X-Slack-Retry-Num']}`);
+    console.log(`will not retry request! attempt num: ${event.headers['X-Slack-Retry-Num']}`);
+    console.log(`retry reason: ${event.headers['X-Slack-Retry-Reason']}`);
+
     return { statusCode: 204, body: '' };
   }
 
   const slackEvent: SlackEvent = body.event;
   if (slackEvent.type !== 'app_mention' && slackEvent.type !== 'message.im') {
-    console.log(JSON.stringify(body));
+    console.log("body: ", JSON.stringify(body));
     // Don't care.
     return {
       statusCode: 204,
@@ -134,7 +136,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const string = chunks.join(' ').trim();
 
   const acronym = findAcronym(string);
-  console.log(acronym);
+  console.log("acronym: ", acronym);
   if (acronym === 'refresh') {
     message(slackEvent, 'Updating...');
     try {
@@ -155,7 +157,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const res = await message(slackEvent, definition);
-    console.log(JSON.stringify(res.data));
+    console.log("response data: ", JSON.stringify(res.data));
   } catch (e) {
     console.error(e);
   }
